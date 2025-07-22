@@ -21,12 +21,12 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   Barcode? _barcode;
   MobileScannerController controller = MobileScannerController();
   final ScoutOpsService _service = ScoutOpsService();
-  
+
   @override
   void initState() {
     super.initState();
     _service.startBatterySimulation();
-    
+
     // Ensure immersive mode is maintained
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
@@ -34,7 +34,8 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
       setState(() {
-        _barcode = barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first : null;
+        _barcode =
+            barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first : null;
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
@@ -66,7 +67,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
       initialData: _service.currentData,
       builder: (context, snapshot) {
         final data = snapshot.data ?? _service.currentData;
-        
+
         return Scaffold(
           backgroundColor: const Color(0xFF1C1C1C),
           extendBodyBehindAppBar: true,
@@ -74,7 +75,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
             children: [
               // Header
               const ScoutHeader(),
-              
+
               // Camera feed area
               Expanded(
                 child: Container(
@@ -92,7 +93,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                           controller: controller,
                           onDetect: _handleBarcode,
                         ),
-                        
+
                         // QR code overlay
                         QRCodeOverlay(
                           barcode: _barcode,
@@ -106,42 +107,59 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                   ),
                 ),
               ),
-              
+
               // Bottom control panel
               Container(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     // Battery indicators
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        BatteryIndicator(
-                          percentage: data.moduleBattery,
-                          label: 'MODULE BATTERY',
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 32.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            BatteryIndicator(
+                              percentage: data.moduleBattery,
+                              label: 'MODULE BATTERY',
+                            ),
+                            const SizedBox(height: 16),
+                            BatteryIndicator(
+                              percentage: data.targetBattery,
+                              label: 'TARGET BATTERY',
+                            ),
+                          ],
                         ),
-                        BatteryIndicator(
-                          percentage: data.targetBattery,
-                          label: 'TARGET BATTERY',
-                        ),
-                      ],
+                      ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Serial number and control buttons
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SerialDisplay(serialNumber: data.serialNumber),
-                        Row(
+                        // Serial on left
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SerialDisplay(
+                              serialNumber: data.serialNumber,
+                            ),
+                          ),
+                        ),
+                        // Buttons on right
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             ControlButton(
                               text: 'RESET',
                               backgroundColor: Colors.red,
                               onPressed: _onReset,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(height: 8),
                             ControlButton(
                               text: 'TEST',
                               backgroundColor: Colors.green,
@@ -151,14 +169,11 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // Shutter button
-                    ShutterButton(
-                      onPressed: _onShutter,
-                      size: 80,
-                    ),
+                    ShutterButton(onPressed: _onShutter, size: 80),
                   ],
                 ),
               ),

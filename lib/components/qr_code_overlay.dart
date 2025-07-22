@@ -26,7 +26,7 @@ class QRCodeOverlay extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.green, width: 2),
           ),
           child: Column(

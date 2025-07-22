@@ -22,7 +22,7 @@ class ShutterButton extends StatelessWidget {
           color: Colors.white,
           border: Border.all(
             color: const Color(0xFF2C2C2C),
-            width: 4,
+            width: 9,
           ),
         ),
         child: Container(

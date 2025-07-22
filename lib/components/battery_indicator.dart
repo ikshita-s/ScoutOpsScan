@@ -21,7 +21,7 @@ class BatteryIndicator extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -29,7 +29,7 @@ class BatteryIndicator extends StatelessWidget {
           Text(
             '${percentage}%',
             style: GoogleFonts.orbitron(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: batteryColor,
             ),
