@@ -85,97 +85,124 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
         final data = snapshot.data ?? _service.currentData;
 
         return Scaffold(
-          backgroundColor: const Color(0xFF1C1C1C),
-          extendBodyBehindAppBar: true,
-          body: Column(
+          backgroundColor: Colors.black,
+          body: Stack(
             children: [
-              // Header
-              const ScoutHeader(),
-
-              // Camera feed area
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Stack(
-                      children: [
-                        // Camera feed
-                        MobileScanner(
-                          controller: controller,
-                          onDetect: _handleBarcode,
-                        ),
-
-                        // QR code overlay
-                        QRCodeOverlay(
-                          barcode: _barcode,
-                          onTap: () {
-                            // Handle QR code tap
-                            print('QR code tapped: ${_barcode?.rawValue}');
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            
+              // Full-screen camera feed
+              MobileScanner(
+                controller: controller,
+                onDetect: _handleBarcode,
+                fit: BoxFit.cover,
               ),
 
-              // Bottom control panel
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Battery indicators
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
+              // QR code overlay
+               Positioned(
+                top: 150,
+                left: 0,
+                right: 0,
+                child: QRCodeOverlay(
+                barcode: _barcode,
+                onTap: () {
+                  // Handle QR code tap
+                  print('QR Code tapped: ${_barcode?.rawValue}');
+                },
+              ),
+              ),
 
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BatteryIndicator(
-                                percentage: 90,
-                                label: 'MODULE BATTERY',
-                              ),
-                              const SizedBox(height: 16),
-                              BatteryIndicator(
-                                percentage: batteryPercentage,
-                                label: 'TARGET BATTERY',
-                              ),
-                              const SizedBox(height: 16),
-                              SerialDisplay(serialNumber: data.serialNumber),
-                            ],
-                          ),
-                        ),
-                        ShutterButton(onPressed: _onShutter, size: 90),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ControlButton(
-                                text: 'RESET',
-                                backgroundColor: Colors.red,
-                                onPressed: _onReset,
-                              ),
-                              const SizedBox(height: 8),
-                              ControlButton(
-                                text: 'TEST',
-                                backgroundColor: Colors.green,
-                                onPressed: _onTest,
-                              ),
-                            ],
-                          ),
-                        ),
+              // Header overlay at the top
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: const ScoutHeader(),
+              ),
+
+              // Bottom control panel overlay
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(1.0),
+                        Colors.black.withOpacity(1.0),
+                        Colors.black.withOpacity(1.0),
+                        Colors.black.withOpacity(0.95),
+                        Colors.black.withOpacity(0.85),
+                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.5),
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.15),
+                        Colors.transparent,
+                      ],
+                      stops: [
+                        0.0,
+                        0.3,
+                        0.4,
+                        0.5,
+                        0.6,
+                        0.7,
+                        0.8,
+                        0.85,
+                        0.9,
+                        1.0,
                       ],
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left side - Battery indicators and serial
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(height: 100),
+                          BatteryIndicator(
+                            percentage: 76,
+                            label: 'MODULE BATTERY',
+                          ),
+                          const SizedBox(height: 8),
+                          BatteryIndicator(
+                            percentage: 90,
+                            label: 'TARGET BATTERY',
+                          ),
+                          const SizedBox(height: 8),
+                          SerialDisplay(
+                            serialNumber: data.serialNumber,
+                          ),
+                        ],
+                      ),
+
+                      // Center - Shutter button
+                      ShutterButton(onPressed: _onShutter, size: 80),
+
+                      // Right side - Control buttons
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ControlButton(
+                            text: 'RESET',
+                            backgroundColor: Colors.red,
+                            onPressed: _onReset,
+                          ),
+                          const SizedBox(height: 8),
+                          ControlButton(
+                            text: 'TEST',
+                            backgroundColor: Colors.green,
+                            onPressed: _onTest,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

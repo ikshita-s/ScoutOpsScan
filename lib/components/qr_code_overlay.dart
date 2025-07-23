@@ -17,7 +17,7 @@ class QRCodeOverlay extends StatelessWidget {
     if (barcode == null) return const SizedBox.shrink();
 
     return Positioned(
-      top: 20,
+     
       left: 20,
       right: 20,
       child: GestureDetector(

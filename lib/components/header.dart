@@ -8,19 +8,28 @@ class ScoutHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100, // Increased height to account for status bar area
-      decoration: const BoxDecoration(
-        color: Color(0x0002edaf),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
+      height: 150, // Increased height for more natural blending
+      decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+        Colors.black, // Solid black at the top
+        Colors.black, // Continue solid
+        Colors.transparent, // Fade to transparent to let camera feed show
+        ],
+        stops: [
+        0.0,
+        0.6, // Adjusted to keep solid black area for text
+        1.0,
+        ],
+      ),
       ),
       child: Padding(
         padding: const EdgeInsets.only(
-          left: 20.0,
-          right: 16.0,
-          top: 40.0,
+          left: 0.0,
+          right: 0.0,
+          top: 0.0,
           bottom: 16.0,
         ),
         child: Row(
@@ -35,7 +44,6 @@ class ScoutHeader extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-
             // Gradient Title
             ShaderMask(
               shaderCallback: (bounds) => const LinearGradient(
@@ -52,12 +60,11 @@ class ScoutHeader extends StatelessWidget {
                 style: GoogleFonts.museoModerno(
                   fontSize: 36,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white, // This color is ignored due to ShaderMask
+                  color: Colors.white, // Ignored due to ShaderMask
                   letterSpacing: 1.5,
                 ),
               ),
             ),
-
             // Spacer
             const SizedBox(width: 12),
           ],
