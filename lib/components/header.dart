@@ -10,7 +10,7 @@ class ScoutHeader extends StatelessWidget {
     return Container(
       height: 100, // Increased height to account for status bar area
       decoration: const BoxDecoration(
-        color: Color(0xFF1C1C1C),
+        color: Color(191919),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
@@ -39,8 +39,8 @@ class ScoutHeader extends StatelessWidget {
             // Gradient Title
             ShaderMask(
               shaderCallback: (bounds) => const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
                   Color(0xFFE53935), // Red
                   Color(0xFF8E24AA), // Purple
@@ -49,9 +49,9 @@ class ScoutHeader extends StatelessWidget {
               ).createShader(bounds),
               child: Text(
                 AppStrings.appTitle,
-                style: GoogleFonts.orbitron(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.museoModerno(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white, // This color is ignored due to ShaderMask
                   letterSpacing: 1.5,
                 ),

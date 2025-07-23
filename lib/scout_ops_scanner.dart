@@ -21,6 +21,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   Barcode? _barcode;
   MobileScannerController controller = MobileScannerController();
   final ScoutOpsService _service = ScoutOpsService();
+  String? batteryPercentage ="0"; 
 
   @override
   void initState() {
@@ -36,6 +37,9 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
       setState(() {
         _barcode =
             barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first : null;
+        print("hi");
+        print(barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first.rawValue : "No Barcode Detected");
+        batteryPercentage = barcodes.barcodes.first.rawValue;
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
@@ -114,47 +118,40 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                 child: Column(
                   children: [
                     // Battery indicators
-                    Align(
+                    Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [           
+                      
+                      Align(
                       alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 32.0),
+                    
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             BatteryIndicator(
-                              percentage: data.moduleBattery,
+                              percentage: 90,
                               label: 'MODULE BATTERY',
                             ),
                             const SizedBox(height: 16),
                             BatteryIndicator(
-                              percentage: data.targetBattery,
+                              percentage: batteryPercentage != null ? int.parse(batteryPercentage!) : 0,
                               label: 'TARGET BATTERY',
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Serial number and control buttons
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Serial on left
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: SerialDisplay(
+                            const SizedBox(height: 16),
+                            SerialDisplay(
                               serialNumber: data.serialNumber,
                             ),
-                          ),
-                        ),
-                        // Buttons on right
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          ],
+                      
+                      ),
+                    ),
+  ShutterButton(onPressed: _onShutter, size: 90),
+                       Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ControlButton(
+                           ControlButton(
                               text: 'RESET',
                               backgroundColor: Colors.red,
                               onPressed: _onReset,
@@ -164,16 +161,20 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                               text: 'TEST',
                               backgroundColor: Colors.green,
                               onPressed: _onTest,
+                            
+
                             ),
                           ],
-                        ),
-                      ],
+                      
+                      ),
                     ),
 
-                    const SizedBox(height: 20),
+                     ] 
+                    ),
+                    
 
-                    // Shutter button
-                    ShutterButton(onPressed: _onShutter, size: 80),
+                
+
                   ],
                 ),
               ),
