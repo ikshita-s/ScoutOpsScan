@@ -39,11 +39,11 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
             ? barcodes.barcodes.first
             : null;
 
-        batteryPercentage = _parseBatteryPercentage(
+        batteryPercentage = _parseBatteryPercentage(_removequote(
           barcodes.barcodes.isNotEmpty
               ? barcodes.barcodes.first.rawValue
               : null,
-        );
+        ));
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
@@ -51,11 +51,19 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
     }
   }
 
+  String _removequote(String? rawValue) {
+    if (rawValue == null || rawValue.isEmpty) {
+      return '';
+    }
+    return rawValue.replaceAll('"', '').trim();
+  }
+
   int _parseBatteryPercentage(String? rawValue) {
     if (rawValue == null || rawValue.isEmpty) {
       return 0;
     }
     final match = rawValue.split(',').first.trim();
+    print('Parsed battery percentage: $match');
     return int.tryParse(match) ?? 0;
   }
 
@@ -97,19 +105,13 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
               ),
 
               // QR code overlay
-               Positioned(
-                top: 150,
-                left: 0,
-                right: 0,
-                child: QRCodeOverlay(
+              QRCodeOverlay(
                 barcode: _barcode,
                 onTap: () {
                   // Handle QR code tap
                   print('QR Code tapped: ${_barcode?.rawValue}');
                 },
               ),
-              ),
-
               // Header overlay at the top
               Positioned(
                 top: 0,
@@ -170,7 +172,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                           ),
                           const SizedBox(height: 8),
                           BatteryIndicator(
-                            percentage: 90,
+                            percentage: batteryPercentage,
                             label: 'TARGET BATTERY',
                           ),
                           const SizedBox(height: 8),
