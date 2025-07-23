@@ -21,7 +21,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   Barcode? _barcode;
   MobileScannerController controller = MobileScannerController();
   final ScoutOpsService _service = ScoutOpsService();
-  String? batteryPercentage ="0"; 
+  int batteryPercentage = 0;
 
   @override
   void initState() {
@@ -35,16 +35,28 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
       setState(() {
-        _barcode =
-            barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first : null;
-        print("hi");
-        print(barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first.rawValue : "No Barcode Detected");
-        batteryPercentage = barcodes.barcodes.first.rawValue;
+        _barcode = barcodes.barcodes.isNotEmpty
+            ? barcodes.barcodes.first
+            : null;
+
+        batteryPercentage = _parseBatteryPercentage(
+          barcodes.barcodes.isNotEmpty
+              ? barcodes.barcodes.first.rawValue
+              : null,
+        );
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
       }
     }
+  }
+
+  int _parseBatteryPercentage(String? rawValue) {
+    if (rawValue == null || rawValue.isEmpty) {
+      return 0;
+    }
+    final match = rawValue.split(',').first.trim();
+    return int.tryParse(match) ?? 0;
   }
 
   void _onReset() {
@@ -119,62 +131,50 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                   children: [
                     // Battery indicators
                     Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [           
-                      
-                      Align(
-                      alignment: Alignment.centerLeft,
-                    
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            BatteryIndicator(
-                              percentage: 90,
-                              label: 'MODULE BATTERY',
-                            ),
-                            const SizedBox(height: 16),
-                            BatteryIndicator(
-                              percentage: batteryPercentage != null ? int.parse(batteryPercentage!) : 0,
-                              label: 'TARGET BATTERY',
-                            ),
-                            const SizedBox(height: 16),
-                            SerialDisplay(
-                              serialNumber: data.serialNumber,
-                            ),
-                          ],
-                      
-                      ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BatteryIndicator(
+                                percentage: 90,
+                                label: 'MODULE BATTERY',
+                              ),
+                              const SizedBox(height: 16),
+                              BatteryIndicator(
+                                percentage: batteryPercentage,
+                                label: 'TARGET BATTERY',
+                              ),
+                              const SizedBox(height: 16),
+                              SerialDisplay(serialNumber: data.serialNumber),
+                            ],
+                          ),
+                        ),
+                        ShutterButton(onPressed: _onShutter, size: 90),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ControlButton(
+                                text: 'RESET',
+                                backgroundColor: Colors.red,
+                                onPressed: _onReset,
+                              ),
+                              const SizedBox(height: 8),
+                              ControlButton(
+                                text: 'TEST',
+                                backgroundColor: Colors.green,
+                                onPressed: _onTest,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-  ShutterButton(onPressed: _onShutter, size: 90),
-                       Align(
-                      alignment: Alignment.centerRight,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                           ControlButton(
-                              text: 'RESET',
-                              backgroundColor: Colors.red,
-                              onPressed: _onReset,
-                            ),
-                            const SizedBox(height: 8),
-                            ControlButton(
-                              text: 'TEST',
-                              backgroundColor: Colors.green,
-                              onPressed: _onTest,
-                            
-
-                            ),
-                          ],
-                      
-                      ),
-                    ),
-
-                     ] 
-                    ),
-                    
-
-                
-
                   ],
                 ),
               ),

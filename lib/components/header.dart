@@ -10,7 +10,7 @@ class ScoutHeader extends StatelessWidget {
     return Container(
       height: 100, // Increased height to account for status bar area
       decoration: const BoxDecoration(
-        color: Color(191919),
+        color: Color(0x0002edaf),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),

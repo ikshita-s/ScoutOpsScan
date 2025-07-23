@@ -27,7 +27,7 @@ class BatteryIndicator extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '${percentage}%',
+            '$percentage%',
             style: GoogleFonts.orbitron(
               fontSize: 14,
               fontWeight: FontWeight.bold,
