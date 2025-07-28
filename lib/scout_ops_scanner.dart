@@ -68,6 +68,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
     if (rawValue == null || rawValue.isEmpty) {
       return '';
     }
+    
     return rawValue.replaceAll('"', '').trim();
   }
 
