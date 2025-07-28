@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -22,11 +24,13 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   MobileScannerController controller = MobileScannerController();
   final ScoutOpsService _service = ScoutOpsService();
   int batteryPercentage = 0;
+  Socket? socket;
 
   @override
   void initState() {
     super.initState();
     _service.startBatterySimulation();
+  
 
     // Ensure immersive mode is maintained
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -34,6 +38,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
+      
       setState(() {
         _barcode = barcodes.barcodes.isNotEmpty
             ? barcodes.barcodes.first
@@ -47,8 +52,16 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
+        sendData (_barcode!.rawValue ?? 'No idea');
       }
     }
+  }
+
+  void sendData  (String data) async {
+    print(data);
+    socket = await Socket.connect("10.182.101.132", 12345).timeout(const Duration(seconds: 10));
+    socket!.write(data);
+
   }
 
   String _removequote(String? rawValue) {
