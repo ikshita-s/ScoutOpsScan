@@ -1,7 +1,7 @@
 //! You do not need to change this file, unless you wanna add Hive Box's
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:hive/hive.dart';
 import 'homepage.dart';
 
 void main() {
@@ -37,6 +37,6 @@ class MyApp extends StatelessWidget {
 
 void addHiveBoxes() {
   //* Add your Hive boxes here if needed
-  // Hive.openBox('your_box_name');
+  Hive.openBox('database');
 }
 

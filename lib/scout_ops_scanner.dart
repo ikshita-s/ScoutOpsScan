@@ -29,7 +29,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   @override
   void initState() {
     super.initState();
-    _service.startBatterySimulation();
+   // _service.startBatterySimulation();
   
 
     // Ensure immersive mode is maintained
@@ -38,7 +38,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
-      
+  
       setState(() {
         _barcode = barcodes.barcodes.isNotEmpty
             ? barcodes.barcodes.first
@@ -181,7 +181,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                         children: [
                           SizedBox(height: 100),
                           BatteryIndicator(
-                            percentage: 76,
+                            percentage: 67, //omg!!!!!!!!!!
                             label: 'MODULE BATTERY',
                           ),
                           const SizedBox(height: 8),

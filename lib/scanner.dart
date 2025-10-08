@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
@@ -10,12 +11,14 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   Barcode? _barcode;
-
+  var box = Hive.box('database');
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
+      box.put('barcode', barcodes.barcodes.first.rawValue);
       setState(() {
-        _barcode =
-            barcodes.barcodes.isNotEmpty ? barcodes.barcodes.first : null;
+        _barcode = barcodes.barcodes.isNotEmpty
+            ? barcodes.barcodes.first
+            : null;
       });
     }
   }
