@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:scout_ops_scan/services/database.dart';
 import 'components/header.dart';
 import 'components/battery_indicator.dart';
 import 'components/serial_display.dart';
@@ -29,8 +30,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   @override
   void initState() {
     super.initState();
-   // _service.startBatterySimulation();
-  
+    // _service.startBatterySimulation();
 
     // Ensure immersive mode is maintained
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -38,37 +38,37 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
-  
       setState(() {
         _barcode = barcodes.barcodes.isNotEmpty
             ? barcodes.barcodes.first
             : null;
 
-        batteryPercentage = _parseBatteryPercentage(_removequote(
-          barcodes.barcodes.isNotEmpty
-              ? barcodes.barcodes.first.rawValue
-              : null,
-        ));
+        batteryPercentage = _parseBatteryPercentage(
+          _removequote(
+            barcodes.barcodes.isNotEmpty
+                ? barcodes.barcodes.first.rawValue
+                : null,
+          ),
+        );
       });
       if (_barcode != null) {
         _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
-        sendData (_barcode!.rawValue ?? 'No idea');
+        sendData(_barcode!.rawValue ?? 'No idea');
       }
     }
   }
 
-  void sendData  (String data) async {
-    print(data);
-    socket = await Socket.connect("10.182.101.132", 12345).timeout(const Duration(seconds: 10));
-    socket!.write(data);
-
+  void sendData(String data) async {
+    // print(data);
+    qrData databaseData = new qrData();
+    databaseData.setCsvData(data);
   }
 
   String _removequote(String? rawValue) {
     if (rawValue == null || rawValue.isEmpty) {
       return '';
     }
-    
+
     return rawValue.replaceAll('"', '').trim();
   }
 
@@ -110,7 +110,6 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-            
               // Full-screen camera feed
               MobileScanner(
                 controller: controller,
@@ -127,12 +126,7 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                 },
               ),
               // Header overlay at the top
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: const ScoutHeader(),
-              ),
+              Positioned(top: 0, left: 0, right: 0, child: const ScoutHeader()),
 
               // Bottom control panel overlay
               Positioned(
@@ -190,14 +184,9 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                             label: 'TARGET BATTERY',
                           ),
                           const SizedBox(height: 8),
-                          SerialDisplay(
-                            serialNumber: data.serialNumber,
-                          ),
+                          SerialDisplay(serialNumber: data.serialNumber),
                         ],
                       ),
-
-                      // Center - Shutter button
-                      ShutterButton(onPressed: _onShutter, size: 80),
 
                       // Right side - Control buttons
                       Column(

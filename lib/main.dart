@@ -7,7 +7,7 @@ import 'homepage.dart';
 void main() {
   // Set the app to fullscreen immersive mode
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  
+
   addHiveBoxes();
   runApp(const MyApp());
 }
@@ -39,4 +39,3 @@ void addHiveBoxes() {
   //* Add your Hive boxes here if needed
   Hive.openBox('database');
 }
-
