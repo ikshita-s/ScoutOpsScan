@@ -137,5 +137,27 @@ class dataManager {
     });
     return data;
   }
+
+  List<String> exportBlueAllianceData() {
+    List<String> blueAllianceData = [];
+    dataBase.keys.forEach((key) {
+      if (dataBase.get(key).getAlliance() == "Blue") {
+        blueAllianceData.add(dataBase.get(key).getCsvData());
+      }
+    });
+    return blueAllianceData;
   }
+
+  List<String> exportRedAllianceData() {
+    List<String> redAllianceData = [];
+    dataBase.keys.forEach((key) {
+      if (dataBase.get(key).getAlliance() == "Red") {
+        redAllianceData.add(dataBase.get(key).getCsvData());
+      }
+    });
+    return redAllianceData;
+  }
+
+
+
 }
