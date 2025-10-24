@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:scout_ops_scan/components/display_number.dart';
 import 'package:scout_ops_scan/services/database.dart';
 import 'components/header.dart';
 import 'components/battery_indicator.dart';
@@ -26,60 +27,23 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   final ScoutOpsService _service = ScoutOpsService();
   int batteryPercentage = 0;
   Socket? socket;
+  String matchNumber = '1';
 
   @override
   void initState() {
     super.initState();
-    // _service.startBatterySimulation();
-
-    // Ensure immersive mode is maintained
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
-      setState(() {
-        _barcode = barcodes.barcodes.isNotEmpty
-            ? barcodes.barcodes.first
-            : null;
 
-        batteryPercentage = _parseBatteryPercentage(
-          _removequote(
-            barcodes.barcodes.isNotEmpty
-                ? barcodes.barcodes.first.rawValue
-                : null,
-          ),
-        );
-      });
-      if (_barcode != null) {
-        _service.updateLastScan(_barcode!.rawValue ?? 'Unknown');
-        sendData(_barcode!.rawValue ?? 'No idea');
-      }
     }
   }
 
-  void sendData(String data) async {
-    // print(data);
-    qrData databaseData = new qrData();
-    databaseData.setCsvData(data);
-  }
 
-  String _removequote(String? rawValue) {
-    if (rawValue == null || rawValue.isEmpty) {
-      return '';
-    }
 
-    return rawValue.replaceAll('"', '').trim();
-  }
 
-  int _parseBatteryPercentage(String? rawValue) {
-    if (rawValue == null || rawValue.isEmpty) {
-      return 0;
-    }
-    final match = rawValue.split(',').first.trim();
-    print('Parsed battery percentage: $match');
-    return int.tryParse(match) ?? 0;
-  }
 
   void _onReset() {
     setState(() {
@@ -174,9 +138,11 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(height: 100),
-                          BatteryIndicator(
-                            percentage: 67, //omg!!!!!!!!!!
-                            label: 'MODULE BATTERY',
+                          DisplayNumber(
+                            value: matchNumber, //omg!!!!!!!!!!
+                            label: '  MATCH NUMBER ',
+                            color: Colors.cyan,
+
                           ),
                           const SizedBox(height: 8),
                           BatteryIndicator(
@@ -193,14 +159,17 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          SizedBox(height: 30),
                           ControlButton(
-                            text: 'RESET',
+                            text: 'SEND',
                             backgroundColor: Colors.red,
                             onPressed: _onReset,
+                            width: 100,
                           ),
                           const SizedBox(height: 8),
                           ControlButton(
-                            text: 'TEST',
+                            width: 100,
+                            text: 'TRANSMIT',
                             backgroundColor: Colors.green,
                             onPressed: _onTest,
                           ),

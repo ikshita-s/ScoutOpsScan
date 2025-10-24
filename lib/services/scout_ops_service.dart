@@ -10,9 +10,9 @@ class ScoutOpsService {
   Stream<ScoutOpsData> get dataStream => _dataController.stream;
 
   ScoutOpsData _currentData = ScoutOpsData(
-    moduleBattery: 76,
-    targetBattery: 90,
-    serialNumber: "#123456",
+    moduleBattery: 0,
+    targetBattery: 0,
+    serialNumber: "#feds201",
   );
 
   ScoutOpsData get currentData => _currentData;

@@ -21,7 +21,7 @@ class ControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? 80,
-      height: 40,
+      height: 60,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
