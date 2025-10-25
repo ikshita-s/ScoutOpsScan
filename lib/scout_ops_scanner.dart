@@ -24,19 +24,16 @@ class ScoutOpsScanner extends StatefulWidget {
 class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
   Barcode? _barcode;
   MobileScannerController controller = MobileScannerController(
-    // Optimize camera settings to prevent buffer overflow
-    cameraResolution: const Size(
-      640,
-      480,
-    ), // Lower resolution for better performance
-    detectionSpeed: DetectionSpeed.normal, // Balanced detection speed
-    detectionTimeoutMs:
-        250, // Prevent too frequent detections (4 per second max)
+    // More aggressive optimization to prevent buffer overflow
+    cameraResolution: const Size(160, 120), // Even lower resolution
+    detectionSpeed: DetectionSpeed.noDuplicates, // Avoid duplicate detections
+    detectionTimeoutMs: 1000, // Slower detection rate (1 per second max)
     returnImage: false, // Don't return images to reduce memory usage
   );
   final ScoutOpsService _service = ScoutOpsService();
   final db.DataManager _dbManager = db.DataManager();
   Socket? socket;
+  DateTime? _lastScanTime;
 
   @override
   void initState() {
@@ -46,6 +43,13 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
 
   void _handleBarcode(BarcodeCapture barcodes) {
     if (mounted) {
+      // Throttle scans to prevent buffer overflow
+      final now = DateTime.now();
+      if (_lastScanTime != null && now.difference(_lastScanTime!).inMilliseconds < 1500) {
+        return; // Skip if less than 1.5 seconds since last scan
+      }
+      _lastScanTime = now;
+
       final scannedData = barcodes.barcodes.first.rawValue;
 
       // Remove surrounding quotes if present
@@ -97,283 +101,6 @@ class _ScoutOpsScannerState extends State<ScoutOpsScanner> {
         SnackBar(content: Text('✗ Error: $e'), backgroundColor: Colors.red),
       );
     }
-  }
-
-  void _showSavedMatches() {
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          final allData = _dbManager.getAll();
-
-          return AlertDialog(
-            backgroundColor: Colors.grey[900],
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Saved Matches (${allData.length})',
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                if (allData.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.delete_sweep, color: Colors.red),
-                    onPressed: () =>
-                        _showDeleteAllConfirmation(context, setState),
-                    tooltip: 'Delete All',
-                  ),
-              ],
-            ),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 400,
-              child: allData.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No saved data',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: allData.length,
-                      itemBuilder: (context, index) {
-                        final record = allData[index];
-                        final key =
-                            '${record.getAlliance}_${record.getMatch}_${record.getStation}';
-
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: record.getAlliance == 'Blue'
-                                ? Colors.blue[900]
-                                : Colors.red[900],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: record.getAlliance == 'Blue'
-                                  ? Colors.blue
-                                  : Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'Quals ${record.getMatch}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white24,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'Station ${record.getStation}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.redAccent,
-                                          size: 20,
-                                        ),
-                                        onPressed: () =>
-                                            _showDeleteConfirmation(
-                                              context,
-                                              key,
-                                              record,
-                                              setState,
-                                            ),
-                                        tooltip: 'Delete this record',
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.person,
-                                    color: Colors.white70,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      record.getName,
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Icon(
-                                    Icons.battery_full,
-                                    color: Colors.green[300],
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${record.getBatteryLevel}%',
-                                    style: TextStyle(
-                                      color: Colors.green[300],
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Scanned: ${record.getTimestamp.toString().split('.')[0]}',
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(color: Colors.cyan),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  final csv = _dbManager.exportCsv();
-                  print('Exported data:\n$csv');
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✓ Data exported to logs'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
-                child: const Text('Export'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showDeleteConfirmation(
-    BuildContext context,
-    String key,
-    db.QrData record,
-    StateSetter setState,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text(
-          'Delete Record',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'Are you sure you want to delete this record?\n\nQuals ${record.getMatch} - Station ${record.getStation} - ${record.getAlliance} Alliance',
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _dbManager.delete(key);
-              setState(() {}); // Refresh the list
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('✓ Record deleted'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAllConfirmation(BuildContext context, StateSetter setState) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text(
-          'Delete All Records',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to delete ALL saved records?\n\nThis action cannot be undone.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _dbManager.clear();
-              setState(() {}); // Refresh the list
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('✓ All records deleted'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete All'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _transmitData() {

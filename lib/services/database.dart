@@ -116,6 +116,19 @@ class DataManager {
   late Box _db;
   bool _initialized = false;
 
+  // Singleton pattern
+  static DataManager? _instance;
+  
+  DataManager._(); // Private constructor
+  
+  static DataManager get instance {
+    _instance ??= DataManager._();
+    return _instance!;
+  }
+
+  // Factory constructor for backward compatibility
+  factory DataManager() => instance;
+
   Future<void> init() async {
     try {
       // Register the adapter before opening the box
